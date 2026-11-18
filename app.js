@@ -63,6 +63,7 @@ const locationFilter = document.querySelector('#location-filter');
 const roleList = document.querySelector('#role-list');
 const resultCount = document.querySelector('#results-count');
 const emptyState = document.querySelector('#empty-state');
+const clearFiltersButton = document.querySelector('#clear-filters');
 
 function renderSnapshot() {
   const rolesNeedingConfirmation = roles.filter((role) =>
@@ -103,10 +104,36 @@ function appendSkillGroup(parent, label, skills, variant) {
   parent.append(group);
 }
 
-function renderSkills(role, parent) {
+function analyzeRole(role) {
+  let matchingSkills = null;
+  let missingSkills = null;
+
+  if (role.requiredSkills !== null) {
+    const candidateSkills = new Set(candidate.skills.map((skill) => skill.toLowerCase()));
+    matchingSkills = role.requiredSkills.filter((skill) =>
+      candidateSkills.has(skill.toLowerCase())
+    );
+    missingSkills = role.requiredSkills.filter((skill) =>
+      !candidateSkills.has(skill.toLowerCase())
+    );
+  }
+
+  return {
+    matchingSkills,
+    missingSkills,
+    gradeAccepted: role.acceptedGrades === null
+      ? null
+      : role.acceptedGrades.includes(candidate.grade),
+    experienceMet: role.minimumRelevantExperienceYears === null
+      ? null
+      : candidate.relevantExperienceYears >= role.minimumRelevantExperienceYears
+  };
+}
+
+function renderSkills(role, parent, analysis) {
   parent.append(makeElement('h4', '', 'Required skills'));
 
-  if (role.requiredSkills === null) {
+  if (analysis.matchingSkills === null || analysis.missingSkills === null) {
     parent.append(makeElement(
       'p',
       'skill-unknown',
@@ -115,16 +142,8 @@ function renderSkills(role, parent) {
     return;
   }
 
-  const candidateSkills = new Set(candidate.skills.map((skill) => skill.toLowerCase()));
-  const matchingSkills = role.requiredSkills.filter((skill) =>
-    candidateSkills.has(skill.toLowerCase())
-  );
-  const missingSkills = role.requiredSkills.filter((skill) =>
-    !candidateSkills.has(skill.toLowerCase())
-  );
-
-  appendSkillGroup(parent, 'Matching skills', matchingSkills, 'match');
-  appendSkillGroup(parent, 'Missing required skills', missingSkills, 'missing');
+  appendSkillGroup(parent, 'Matching skills', analysis.matchingSkills, 'match');
+  appendSkillGroup(parent, 'Missing required skills', analysis.missingSkills, 'missing');
 }
 
 function appendCheck(parent, label, state, message) {
@@ -142,33 +161,31 @@ function appendCheck(parent, label, state, message) {
   parent.append(row);
 }
 
-function renderChecks(role, parent) {
+function renderChecks(role, parent, analysis) {
   parent.append(makeElement('h4', '', 'Eligibility checks'));
   const checks = makeElement('dl', 'checks');
 
-  if (role.acceptedGrades === null) {
+  if (analysis.gradeAccepted === null) {
     appendCheck(checks, 'Grade', 'unknown', 'accepted grades were not provided.');
   } else {
-    const gradeAccepted = role.acceptedGrades.includes(candidate.grade);
     appendCheck(
       checks,
       'Grade',
-      gradeAccepted ? 'yes' : 'no',
-      gradeAccepted
+      analysis.gradeAccepted ? 'yes' : 'no',
+      analysis.gradeAccepted
         ? `${candidate.grade} is explicitly listed as accepted.`
         : `${candidate.grade} is not explicitly listed as accepted.`
     );
   }
 
-  if (role.minimumRelevantExperienceYears === null) {
+  if (analysis.experienceMet === null) {
     appendCheck(checks, 'Experience', 'unknown', 'minimum relevant experience was not provided.');
   } else {
-    const experienceMet = candidate.relevantExperienceYears >= role.minimumRelevantExperienceYears;
     appendCheck(
       checks,
       'Experience',
-      experienceMet ? 'yes' : 'no',
-      experienceMet
+      analysis.experienceMet ? 'yes' : 'no',
+      analysis.experienceMet
         ? `${candidate.relevantExperienceYears} years meets the ${role.minimumRelevantExperienceYears}-year minimum.`
         : `${candidate.relevantExperienceYears} years is below the ${role.minimumRelevantExperienceYears}-year minimum.`
     );
@@ -177,7 +194,15 @@ function renderChecks(role, parent) {
   parent.append(checks);
 }
 
+function appendSummaryItem(parent, label, state, message) {
+  const item = makeElement('li', `summary-item summary-item--${state}`);
+  item.append(makeElement('span', 'summary-label', label));
+  item.append(makeElement('span', 'summary-value', message));
+  parent.append(item);
+}
+
 function renderRole(role) {
+  const analysis = analyzeRole(role);
   const card = makeElement('article', 'role-card');
   const heading = makeElement('header', 'role-card__heading');
   const titleGroup = makeElement('div');
@@ -187,17 +212,45 @@ function renderRole(role) {
   heading.append(makeElement('span', 'role-location', role.location));
   card.append(heading);
 
+  const summary = makeElement('ul', 'role-summary');
+  const skillsState = analysis.matchingSkills === null
+    ? 'unknown'
+    : analysis.missingSkills.length === 0 ? 'yes' : 'no';
+  const skillsMessage = analysis.matchingSkills === null
+    ? 'Needs confirmation'
+    : `${analysis.matchingSkills.length} matched · ${analysis.missingSkills.length} missing`;
+  const gradeState = analysis.gradeAccepted === null
+    ? 'unknown'
+    : analysis.gradeAccepted ? 'yes' : 'no';
+  const gradeMessage = analysis.gradeAccepted === null
+    ? 'Needs confirmation'
+    : analysis.gradeAccepted ? `${candidate.grade} accepted` : `${candidate.grade} not listed`;
+  const experienceState = analysis.experienceMet === null
+    ? 'unknown'
+    : analysis.experienceMet ? 'yes' : 'no';
+  const experienceMessage = analysis.experienceMet === null
+    ? 'Needs confirmation'
+    : analysis.experienceMet ? 'Meets minimum' : 'Below minimum';
+
+  appendSummaryItem(summary, 'Skills', skillsState, skillsMessage);
+  appendSummaryItem(summary, 'Grade', gradeState, gradeMessage);
+  appendSummaryItem(summary, 'Experience', experienceState, experienceMessage);
+  card.append(summary);
+
+  const explanation = makeElement('details', 'role-explanation');
+  explanation.append(makeElement('summary', '', 'View matching details'));
   const details = makeElement('div', 'role-card__details');
   const skills = makeElement('section');
   skills.setAttribute('aria-label', 'Skill comparison');
-  renderSkills(role, skills);
+  renderSkills(role, skills, analysis);
 
   const eligibility = makeElement('section');
   eligibility.setAttribute('aria-label', 'Grade and experience checks');
-  renderChecks(role, eligibility);
+  renderChecks(role, eligibility, analysis);
 
   details.append(skills, eligibility);
-  card.append(details);
+  explanation.append(details);
+  card.append(explanation);
   return card;
 }
 
@@ -226,6 +279,14 @@ function render() {
   roleList.replaceChildren(...visibleRoles.map(renderRole));
   resultCount.textContent = `Showing ${visibleRoles.length} of ${roles.length} roles`;
   emptyState.hidden = visibleRoles.length > 0;
+  clearFiltersButton.disabled = query.length === 0 && selectedLocation.length === 0;
+}
+
+function clearFilters() {
+  searchInput.value = '';
+  locationFilter.value = '';
+  render();
+  searchInput.focus();
 }
 
 const locations = [...new Set(roles.map((role) => role.location))].sort();
@@ -237,5 +298,6 @@ locations.forEach((location) => {
 
 searchInput.addEventListener('input', render);
 locationFilter.addEventListener('change', render);
+clearFiltersButton.addEventListener('click', clearFilters);
 renderSnapshot();
 render();

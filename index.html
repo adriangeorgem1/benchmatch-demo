@@ -83,20 +83,23 @@
           <div class="field">
             <label for="role-search">Search roles</label>
             <input id="role-search" type="search" placeholder="Search title, client, skills…" autocomplete="off">
-            <p class="field-hint">Searches role details, including required skills and grades.</p>
+            <p class="field-hint">Search titles, clients, skills, locations, grades, or experience.</p>
           </div>
           <div class="field">
             <label for="location-filter">Filter by location</label>
             <select id="location-filter">
               <option value="">All locations</option>
             </select>
-            <p class="field-hint">London is only a preference unless you filter by it here.</p>
+            <p class="field-hint">London stays a preference until selected here.</p>
+          </div>
+          <div class="filters-actions">
+            <button class="clear-filters" id="clear-filters" type="button" disabled>Clear filters</button>
           </div>
         </div>
 
         <p class="results-count" id="results-count" role="status" aria-live="polite"></p>
         <div class="role-list" id="role-list" aria-label="Matching roles"></div>
-        <p class="empty-state" id="empty-state" hidden>No roles match those filters. Try a different search or location.</p>
+        <p class="empty-state" id="empty-state" hidden>No roles match these filters. Clear filters to see all roles.</p>
       </section>
     </main>
 

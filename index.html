@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A simple, fictional candidate-to-role matching demo.">
+    <meta name="description" content="A local, rules-based demo for comparing a candidate profile with demand-sheet roles.">
     <title>BenchMatch — Role matching demo</title>
     <link rel="stylesheet" href="styles.css">
     <script src="app.js" defer></script>
@@ -18,7 +18,7 @@
       <section class="intro" aria-labelledby="page-title">
         <p class="eyebrow">Candidate and role overview</p>
         <h1 id="page-title">Find a role that fits</h1>
-        <p>Compare a fictional candidate profile with fictional roles using simple, visible rules.</p>
+        <p>Check a candidate profile against a demand sheet with simple, visible rules.</p>
       </section>
 
       <section class="candidate-panel" aria-labelledby="candidate-heading">
@@ -27,84 +27,83 @@
             <p class="eyebrow">Candidate profile</p>
             <h2 id="candidate-heading">Your starting point</h2>
           </div>
-          <span class="profile-badge">Demo profile</span>
+          <span class="profile-badge">Editable demo profile</span>
         </div>
-        <dl class="candidate-facts">
-          <div>
-            <dt>Grade</dt>
-            <dd>B2</dd>
+        <form class="candidate-editor" id="candidate-form" autocomplete="off">
+          <div class="field">
+            <label for="candidate-grade">Grade</label>
+            <input id="candidate-grade" type="text" maxlength="30">
           </div>
-          <div>
-            <dt>Skills</dt>
-            <dd>React, TypeScript, QA Testing</dd>
+          <div class="field">
+            <label for="candidate-skills">Skills</label>
+            <input id="candidate-skills" type="text" aria-describedby="skills-hint">
+            <p class="field-hint" id="skills-hint">Separate skill names with commas.</p>
           </div>
-          <div>
-            <dt>Relevant experience</dt>
-            <dd>3 years total</dd>
+          <div class="field">
+            <label for="candidate-experience">Relevant experience (years)</label>
+            <input id="candidate-experience" type="number" min="0" step="any">
           </div>
-          <div>
-            <dt>Preferred location</dt>
-            <dd>London</dd>
+          <div class="field">
+            <label for="candidate-location">Preferred location</label>
+            <input id="candidate-location" type="text">
           </div>
-        </dl>
-      </section>
-
-      <section class="demo-snapshot" aria-label="Demo snapshot">
-        <div class="snapshot-item">
-          <span class="snapshot-value" id="role-total">6</span>
-          <span class="snapshot-label">fictional roles</span>
-        </div>
-        <div class="snapshot-item">
-          <span class="snapshot-value" id="grade-total">4</span>
-          <span class="snapshot-label">explicitly list B2</span>
-        </div>
-        <div class="snapshot-item">
-          <span class="snapshot-value" id="confirmation-total">2</span>
-          <span class="snapshot-label">need information confirmed</span>
-        </div>
-        <p class="snapshot-note">Counts only — roles are not scored or ranked.</p>
+        </form>
       </section>
 
       <section class="roles-section" aria-labelledby="roles-heading">
         <div class="section-heading roles-heading">
           <div>
-            <p class="eyebrow">Six fictional opportunities</p>
+            <p class="eyebrow">Demand sheet</p>
             <h2 id="roles-heading">Role list</h2>
           </div>
-          <p class="matching-note">Matching uses simple rules. No scores or grade equivalences.</p>
+          <p class="matching-note">Simple rules only. No scores or grade equivalences.</p>
         </div>
 
         <aside class="rules-note" aria-labelledby="rules-heading">
           <h3 id="rules-heading">How to read the checks</h3>
-          <p>Skills are compared by exact name, B2 must be explicitly listed, and experience must meet the stated minimum. Missing role details are marked “Needs confirmation.”</p>
+          <p>Skills use exact names (ignoring case), grades must be explicitly listed, and experience must meet the stated minimum. Known gaps stay visible; missing details need confirmation. London is a preference unless you filter by it.</p>
         </aside>
 
-        <div class="filters">
-          <div class="field">
-            <label for="role-search">Search roles</label>
-            <input id="role-search" type="search" placeholder="Search title, client, skills…" autocomplete="off">
-            <p class="field-hint">Search titles, clients, skills, locations, grades, or experience.</p>
-          </div>
-          <div class="field">
-            <label for="location-filter">Filter by location</label>
-            <select id="location-filter">
-              <option value="">All locations</option>
-            </select>
-            <p class="field-hint">London stays a preference until selected here.</p>
-          </div>
-          <div class="filters-actions">
-            <button class="clear-filters" id="clear-filters" type="button" disabled>Clear filters</button>
+        <div class="role-tools">
+          <section class="import-panel" aria-labelledby="import-heading">
+            <h3 id="import-heading">Import demand sheet</h3>
+            <p class="field-hint">Choose an Excel sheet saved as CSV. The file is processed in this browser.</p>
+            <div class="import-file">
+              <label for="demand-file">Choose a CSV file</label>
+              <input id="demand-file" type="file" accept=".csv,text/csv">
+            </div>
+            <div class="import-actions">
+              <button class="button button--primary" id="load-sample" type="button">Load sample data</button>
+              <a class="download-link" id="download-example" download="benchmatch-sample-demand.csv">Download fictional example</a>
+            </div>
+            <p class="import-message" id="import-message" role="status" aria-live="polite"></p>
+          </section>
+
+          <div class="filters" aria-label="Role filters">
+            <div class="field">
+              <label for="role-search">Search roles</label>
+              <input id="role-search" type="search" placeholder="Search title, client, skills…" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="location-filter">Filter by location</label>
+              <select id="location-filter">
+                <option value="">All locations</option>
+              </select>
+            </div>
+            <div class="filters-actions">
+              <button class="clear-filters" id="clear-filters" type="button" disabled>Clear filters</button>
+            </div>
           </div>
         </div>
 
         <p class="results-count" id="results-count" role="status" aria-live="polite"></p>
         <div class="role-list" id="role-list" aria-label="Matching roles"></div>
-        <p class="empty-state" id="empty-state" hidden>No roles match these filters. Clear filters to see all roles.</p>
+        <p class="empty-state" id="empty-state" hidden>No roles match these filters. Clear filters to see the full list.</p>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>BenchMatch demo · Fictional data · Simple rule-based matching</p>
+      <p>BenchMatch demo · Fictional data · Local, rule-based matching</p>
     </footer>
   </body>
 </html>

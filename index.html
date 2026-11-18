@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A simple, fictional candidate-to-role matching demo.">
+    <title>BenchMatch — Role matching demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="BenchMatch home">BenchMatch</a>
+      <span class="demo-label">Front-end POC</span>
+    </header>
+
+    <main class="page-shell">
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">Candidate and role overview</p>
+        <h1 id="page-title">Find a role that fits</h1>
+        <p>Compare a fictional candidate profile with fictional roles using simple, visible rules.</p>
+      </section>
+
+      <section class="candidate-panel" aria-labelledby="candidate-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Candidate profile</p>
+            <h2 id="candidate-heading">Your starting point</h2>
+          </div>
+          <span class="profile-badge">Demo profile</span>
+        </div>
+        <dl class="candidate-facts">
+          <div>
+            <dt>Grade</dt>
+            <dd>B2</dd>
+          </div>
+          <div>
+            <dt>Skills</dt>
+            <dd>React, TypeScript, QA Testing</dd>
+          </div>
+          <div>
+            <dt>Relevant experience</dt>
+            <dd>3 years total</dd>
+          </div>
+          <div>
+            <dt>Preferred location</dt>
+            <dd>London</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="demo-snapshot" aria-label="Demo snapshot">
+        <div class="snapshot-item">
+          <span class="snapshot-value" id="role-total">6</span>
+          <span class="snapshot-label">fictional roles</span>
+        </div>
+        <div class="snapshot-item">
+          <span class="snapshot-value" id="grade-total">4</span>
+          <span class="snapshot-label">explicitly list B2</span>
+        </div>
+        <div class="snapshot-item">
+          <span class="snapshot-value" id="confirmation-total">2</span>
+          <span class="snapshot-label">need information confirmed</span>
+        </div>
+        <p class="snapshot-note">Counts only — roles are not scored or ranked.</p>
+      </section>
+
+      <section class="roles-section" aria-labelledby="roles-heading">
+        <div class="section-heading roles-heading">
+          <div>
+            <p class="eyebrow">Six fictional opportunities</p>
+            <h2 id="roles-heading">Role list</h2>
+          </div>
+          <p class="matching-note">Matching uses simple rules. No scores or grade equivalences.</p>
+        </div>
+
+        <aside class="rules-note" aria-labelledby="rules-heading">
+          <h3 id="rules-heading">How to read the checks</h3>
+          <p>Skills are compared by exact name, B2 must be explicitly listed, and experience must meet the stated minimum. Missing role details are marked “Needs confirmation.”</p>
+        </aside>
+
+        <div class="filters">
+          <div class="field">
+            <label for="role-search">Search roles</label>
+            <input id="role-search" type="search" placeholder="Search title, client, skills…" autocomplete="off">
+            <p class="field-hint">Searches role details, including required skills and grades.</p>
+          </div>
+          <div class="field">
+            <label for="location-filter">Filter by location</label>
+            <select id="location-filter">
+              <option value="">All locations</option>
+            </select>
+            <p class="field-hint">London is only a preference unless you filter by it here.</p>
+          </div>
+        </div>
+
+        <p class="results-count" id="results-count" role="status" aria-live="polite"></p>
+        <div class="role-list" id="role-list" aria-label="Matching roles"></div>
+        <p class="empty-state" id="empty-state" hidden>No roles match those filters. Try a different search or location.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>BenchMatch demo · Fictional data · Simple rule-based matching</p>
+    </footer>
+  </body>
+</html>

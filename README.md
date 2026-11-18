@@ -4,6 +4,8 @@ A small, browser-ready front-end POC for comparing one fictional candidate profi
 
 ## Open the demo
 
+Try the [live demo](https://adriangeorgem1.github.io/benchmatch-demo/).
+
 Open `index.html` in a modern browser. Search roles by title, fictional client, location, required skill, grade, or experience. Use the location dropdown only when you want to filter by a specific location.
 
 ## How matching works
